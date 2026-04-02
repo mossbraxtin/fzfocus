@@ -52,6 +52,7 @@ _todo_format_list() {
 
 _todo_preview() {
     local id="$1"
+    [[ $id =~ ^[0-9]+$ ]] || return 0
     db_query "SELECT title, description, due_date, priority, status, tags, linked_note
               FROM todos WHERE id=$id;" | while IFS='|' read -r title desc due priority status tags note; do
         echo -e "\033[1mTitle:\033[0m      $title"
@@ -141,7 +142,7 @@ cmd_todo() {
             --prompt '  Todos › ' \
             --header $'j/k navigate · ENTER edit · a add · d done · D delete · p priority · q back\nalt-n note · alt-f filter' \
             --header-first \
-            --preview "$(realpath "$0") --preview-todo \$(echo {} | grep -oP '^\S+\s+\K[0-9]+')" \
+            --preview "$FZFOCUS_SCRIPT --preview-todo \$(echo {} | grep -oP '(?<=\s)[0-9]+(?=\s)' | head -1)" \
             --preview-label ' Detail ' \
             --preview-label-pos 'bottom' \
             --preview-window 'right:45%:wrap:border-left' \

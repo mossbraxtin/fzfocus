@@ -38,6 +38,8 @@ source "$SCRIPT_DIR/lib/dashboard.sh"
 # ── internal preview handlers (called by fzf --preview) ───────────────────────
 
 _handle_preview_todo() {
+    # Guard: must be a non-empty integer
+    [[ $1 =~ ^[0-9]+$ ]] || exit 0
     db_init
     _todo_preview "$1"
 }
@@ -45,6 +47,11 @@ _handle_preview_todo() {
 _handle_preview_day() {
     db_init
     _cal_preview_day "$1"
+}
+
+_handle_preview_cal_grid() {
+    # args: selected_date year month
+    _cal_preview_grid "$1" "$2" "$3"
 }
 
 _handle_preview_dash() {
@@ -103,9 +110,10 @@ EOF
 
 # Internal preview dispatch (used by fzf --preview flags)
 case "${1:-}" in
-    --preview-todo) _handle_preview_todo "$2"; exit 0 ;;
-    --preview-day)  _handle_preview_day  "$2"; exit 0 ;;
-    --preview-dash) _handle_preview_dash "$2"; exit 0 ;;
+    --preview-todo)     _handle_preview_todo "$2"; exit 0 ;;
+    --preview-day)      _handle_preview_day  "$2"; exit 0 ;;
+    --preview-cal-grid) _handle_preview_cal_grid "$2" "$3" "$4"; exit 0 ;;
+    --preview-dash)     _handle_preview_dash "$2"; exit 0 ;;
     --preview-note) _handle_preview_note "$2"; exit 0 ;;
 esac
 
