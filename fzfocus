@@ -1,0 +1,120 @@
+#!/bin/bash
+# fzfocus — fzf-based personal info manager (calendar, todos, notes)
+# Usage: fzfocus [command]
+
+VERSION="0.1.0"
+
+# ── config ─────────────────────────────────────────────────────────────────────
+
+DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/fzfocus"
+NOTES_DIR="$DATA_DIR/notes"
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/fzfocus/config"
+[[ -f $CONFIG_FILE ]] && source "$CONFIG_FILE"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ── dependencies ───────────────────────────────────────────────────────────────
+
+_check_deps() {
+    local missing=()
+    for dep in fzf nvim sqlite3 bat; do
+        command -v "$dep" &>/dev/null || missing+=("$dep")
+    done
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        echo "fzfocus: missing dependencies: ${missing[*]}" >&2
+        exit 1
+    fi
+}
+
+# ── lib ────────────────────────────────────────────────────────────────────────
+
+source "$SCRIPT_DIR/lib/db.sh"
+source "$SCRIPT_DIR/lib/todos.sh"
+source "$SCRIPT_DIR/lib/notes.sh"
+source "$SCRIPT_DIR/lib/calendar.sh"
+source "$SCRIPT_DIR/lib/dashboard.sh"
+
+# ── internal preview handlers (called by fzf --preview) ───────────────────────
+
+_handle_preview_todo() {
+    db_init
+    _todo_preview "$1"
+}
+
+_handle_preview_day() {
+    db_init
+    _cal_preview_day "$1"
+}
+
+_handle_preview_dash() {
+    db_init
+    _dash_preview_item "$1"
+}
+
+# ── usage ──────────────────────────────────────────────────────────────────────
+
+_usage() {
+    cat <<EOF
+fzfocus $VERSION — fzf-based personal info manager
+
+Usage:
+  fzfocus [command]
+
+Commands:
+  (none)      Open dashboard (default)
+  todo        Browse and manage todos
+  notes       Browse and edit notes
+  calendar    Browse calendar by day
+
+Options:
+  -h, --help      Show this help message
+  -V, --version   Show version information
+
+Key bindings (all views):
+  j / k       Navigate down/up
+  g / G       Jump to top/bottom
+  ENTER       Open/edit selected item
+  ESC / q     Back to dashboard (or quit from dashboard)
+  ALT-P       Toggle preview pane
+  /           Enable fuzzy search (dashboard)
+
+Dashboard:
+  t           Switch to Todos view
+  n           Switch to Notes view
+  c           Switch to Calendar view
+  a           Quick-add todo
+
+Configuration:
+  ~/.config/fzfocus/config   Sourced at startup
+
+Data:
+  ~/.local/share/fzfocus/notes/    Markdown notes
+  ~/.local/share/fzfocus/fzfocus.db  SQLite database (todos)
+EOF
+}
+
+# ── entry point ────────────────────────────────────────────────────────────────
+
+# Internal preview dispatch (used by fzf --preview flags)
+case "${1:-}" in
+    --preview-todo) _handle_preview_todo "$2"; exit 0 ;;
+    --preview-day)  _handle_preview_day  "$2"; exit 0 ;;
+    --preview-dash) _handle_preview_dash "$2"; exit 0 ;;
+esac
+
+_check_deps
+db_init
+mkdir -p "$NOTES_DIR"
+
+case "${1:-}" in
+    todo)          cmd_todo ;;
+    notes)         cmd_notes ;;
+    calendar)      cmd_calendar ;;
+    -h|--help)     _usage ;;
+    -V|--version)  echo "fzfocus $VERSION" ;;
+    "")            cmd_dashboard ;;
+    *)
+        echo "fzfocus: unknown command '$1'. See 'fzfocus --help'" >&2
+        exit 1
+        ;;
+esac
