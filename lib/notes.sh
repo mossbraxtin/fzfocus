@@ -104,19 +104,24 @@ cmd_notes() {
         list=$(_notes_format_list)
         [[ -z $list ]] && list="  (no notes — press 'a' to create one)"
 
+        printf '\033[2J\033[H'
         local selection
         selection=$(echo "$list" | fzf \
             --ansi \
             --disabled \
-            --prompt ' Notes > ' \
-            --header $'j/k: navigate  ENTER: open  a: new  D: delete  r: rename  q: back\n ALT-t: link todo  ALT-d: date info' \
-            --preview "awk '{print \$NF}' <<< {} | xargs -I{f} bat --color=always --style=plain '$NOTES_DIR/{f}' 2>/dev/null || echo '(empty)'" \
-            --preview-label ' Note Preview ' \
+            --border rounded \
+            --border-label ' 󰂺 Notes ' \
+            --border-label-pos top \
+            --prompt '  Notes › ' \
+            --header $'j/k navigate · ENTER open · a new · D delete · r rename · q back\nalt-t link todo · alt-p toggle preview' \
+            --header-first \
+            --preview "$FZFOCUS_SCRIPT --preview-note \$(echo {} | awk '{print \$NF}')" \
+            --preview-label ' Preview ' \
             --preview-label-pos 'bottom' \
-            --preview-window 'right:55%:wrap' \
+            --preview-window 'right:55%:wrap:border-left' \
             --bind 'j:down,k:up,g:first,G:last' \
-            --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up' \
-            --bind 'alt-k:preview-up,alt-j:preview-down' \
+            --bind 'ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up' \
+            --bind 'ctrl-k:preview-up,ctrl-j:preview-down' \
             --bind 'alt-p:toggle-preview' \
             --bind "q:become(echo __DASHBOARD__)" \
             --bind "esc:become(echo __DASHBOARD__)" \
@@ -124,8 +129,8 @@ cmd_notes() {
             --bind "D:become(echo __DELETE__{})" \
             --bind "r:become(echo __RENAME__{})" \
             --bind "alt-t:become(echo __LINK_TODO__{})" \
-            --bind "alt-d:become(echo __DATE_INFO__{})" \
-            --color 'pointer:cyan,marker:cyan,header:italic,prompt:cyan,hl:cyan,hl+:cyan' \
+            --bind "alt-i:become(echo __DATE_INFO__{})" \
+            --color 'pointer:cyan,marker:cyan,header:italic:dim,prompt:cyan,hl:cyan,hl+:cyan,border:cyan,label:cyan' \
             --no-multi \
             --expect='enter' \
             2>/dev/null)
@@ -155,11 +160,10 @@ cmd_notes() {
                 ;;
             __DATE_INFO__*)
                 if [[ -n $file && -f $NOTES_DIR/$file ]]; then
-                    local created modified
-                    created=$(stat -c '%y' "$NOTES_DIR/$file" 2>/dev/null | cut -d' ' -f1)
+                    local modified
                     modified=$(date -r "$NOTES_DIR/$file" '+%Y-%m-%d %H:%M' 2>/dev/null)
                     echo -e "\nModified: $modified"
-                    sleep 2
+                    sleep 1
                 fi
                 ;;
             *)

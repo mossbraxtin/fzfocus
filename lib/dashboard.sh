@@ -119,19 +119,24 @@ cmd_dashboard() {
         local list
         list=$(_dash_build_list)
 
+        printf '\033[2J\033[H'
         local selection
         selection=$(echo "$list" | fzf \
             --ansi \
             --disabled \
-            --prompt ' fzfocus > ' \
-            --header $'j/k: navigate  t: todos  n: notes  c: calendar  a: add todo  /: search  q: quit' \
-            --preview "$(realpath "$0") --preview-dash {}" \
+            --border rounded \
+            --border-label '  fzfocus ' \
+            --border-label-pos top \
+            --prompt '   › ' \
+            --header $'j/k navigate · t todos · n notes · c calendar · a add · / search · q quit' \
+            --header-first \
+            --preview "$FZFOCUS_SCRIPT --preview-dash {}" \
             --preview-label ' Detail ' \
             --preview-label-pos 'bottom' \
-            --preview-window 'right:45%:wrap' \
+            --preview-window 'right:45%:wrap:border-left' \
             --bind 'j:down,k:up,g:first,G:last' \
-            --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up' \
-            --bind 'alt-k:preview-up,alt-j:preview-down' \
+            --bind 'ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up' \
+            --bind 'ctrl-k:preview-up,ctrl-j:preview-down' \
             --bind 'alt-p:toggle-preview' \
             --bind "/:enable-search" \
             --bind "t:become(echo __TODOS__)" \
@@ -140,7 +145,7 @@ cmd_dashboard() {
             --bind "a:become(echo __ADD_TODO__)" \
             --bind "q:become(echo __QUIT__)" \
             --bind "esc:become(echo __QUIT__)" \
-            --color 'pointer:magenta,marker:magenta,header:italic,prompt:magenta,hl:magenta,hl+:magenta' \
+            --color 'pointer:magenta,marker:magenta,header:italic:dim,prompt:magenta,hl:magenta,hl+:magenta,border:magenta,label:bold:magenta' \
             --no-multi \
             --expect='enter' \
             2>/dev/null)

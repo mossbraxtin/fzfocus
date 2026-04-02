@@ -131,18 +131,23 @@ cmd_todo() {
 
         local FZFOCUS_CMD="$0"
         local selection
+        printf '\033[2J\033[H'
         selection=$(echo "$list" | fzf \
             --ansi \
             --disabled \
-            --prompt ' Todos > ' \
-            --header $'j/k: navigate  ENTER: edit  a: add  d: done  D: delete  p: priority  q: back\n ALT-n: open note  ALT-f: filter' \
-            --preview "echo {} | grep -oP '^\S+\s+\K[0-9]+' | xargs -I{id} $(realpath "$0") --preview-todo {id}" \
-            --preview-label ' Todo Detail ' \
+            --border rounded \
+            --border-label ' 󰄬 Todos ' \
+            --border-label-pos top \
+            --prompt '  Todos › ' \
+            --header $'j/k navigate · ENTER edit · a add · d done · D delete · p priority · q back\nalt-n note · alt-f filter' \
+            --header-first \
+            --preview "$(realpath "$0") --preview-todo \$(echo {} | grep -oP '^\S+\s+\K[0-9]+')" \
+            --preview-label ' Detail ' \
             --preview-label-pos 'bottom' \
-            --preview-window 'right:45%:wrap' \
+            --preview-window 'right:45%:wrap:border-left' \
             --bind 'j:down,k:up,g:first,G:last' \
-            --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up' \
-            --bind 'alt-k:preview-up,alt-j:preview-down' \
+            --bind 'ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up' \
+            --bind 'ctrl-k:preview-up,ctrl-j:preview-down' \
             --bind 'alt-p:toggle-preview' \
             --bind "q:become(echo __DASHBOARD__)" \
             --bind "esc:become(echo __DASHBOARD__)" \
@@ -152,7 +157,7 @@ cmd_todo() {
             --bind "p:become(echo __PRIORITY__{})" \
             --bind "alt-n:become(echo __OPEN_NOTE__{})" \
             --bind "alt-f:become(echo __FILTER__)" \
-            --color 'pointer:yellow,marker:yellow,header:italic,prompt:yellow,hl:yellow,hl+:yellow' \
+            --color 'pointer:yellow,marker:yellow,header:italic:dim,prompt:yellow,hl:yellow,hl+:yellow,border:yellow,label:yellow' \
             --no-multi \
             --expect='enter' \
             2>/dev/null)

@@ -145,19 +145,24 @@ cmd_calendar() {
         local month_header
         month_header=$(_cal_render_month "$year" "$month")
 
+        printf '\033[2J\033[H'
         local selection
         selection=$(echo "$list" | fzf \
             --ansi \
             --disabled \
-            --prompt " $(date -d "$year-$month-01" '+%B %Y') > " \
-            --header $'j/k: navigate  [/]: prev/next month  ENTER: day detail  a: add todo  q: back' \
+            --border rounded \
+            --border-label " 󰃮 $(date -d "$year-$month-01" '+%B %Y') " \
+            --border-label-pos top \
+            --prompt '  Calendar › ' \
+            --header $'j/k navigate · [/] prev/next month · ENTER day detail · a add todo · q back' \
+            --header-first \
             --preview "$(realpath "$0") --preview-day {1}" \
-            --preview-label ' Day Detail ' \
+            --preview-label ' Day ' \
             --preview-label-pos 'bottom' \
-            --preview-window 'right:45%:wrap' \
+            --preview-window 'right:45%:wrap:border-left' \
             --bind 'j:down,k:up,g:first,G:last' \
-            --bind 'alt-d:preview-half-page-down,alt-u:preview-half-page-up' \
-            --bind 'alt-k:preview-up,alt-j:preview-down' \
+            --bind 'ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up' \
+            --bind 'ctrl-k:preview-up,ctrl-j:preview-down' \
             --bind 'alt-p:toggle-preview' \
             --bind "q:become(echo __DASHBOARD__)" \
             --bind "esc:become(echo __DASHBOARD__)" \
@@ -165,7 +170,7 @@ cmd_calendar() {
             --bind "t:become(echo __TODOS__)" \
             --bind "[:become(echo __PREV_MONTH__)" \
             --bind "]:become(echo __NEXT_MONTH__)" \
-            --color 'pointer:blue,marker:blue,header:italic,prompt:blue,hl:blue,hl+:blue' \
+            --color 'pointer:blue,marker:blue,header:italic:dim,prompt:blue,hl:blue,hl+:blue,border:blue,label:blue' \
             --no-multi \
             --expect='enter' \
             2>/dev/null)
