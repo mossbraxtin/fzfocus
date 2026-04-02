@@ -182,7 +182,7 @@ cmd_calendar() {
         key=$(echo "$selection" | head -1)
         line=$(echo "$selection" | tail -1)
         local date_str
-        date_str=$(echo "$line" | awk '{print $1}')
+        date_str=$(echo "$line" | sed 's/__ADD__//' | awk '{print $1}')
 
         case "$line" in
             __DASHBOARD__) return ;;
