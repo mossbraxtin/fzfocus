@@ -1,0 +1,9 @@
+# bash completion for fzfocus
+
+_fzfocus() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local commands="todo notes calendar --help --version"
+    COMPREPLY=($(compgen -W "$commands" -- "$cur"))
+}
+
+complete -F _fzfocus fzfocus

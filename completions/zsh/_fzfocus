@@ -1,0 +1,13 @@
+#compdef fzfocus
+
+_fzfocus() {
+    local -a commands
+    commands=(
+        'todo:Browse and manage todos'
+        'notes:Browse and edit notes'
+        'calendar:Browse calendar by day'
+    )
+    _describe 'command' commands
+}
+
+_fzfocus "$@"
