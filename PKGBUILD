@@ -8,7 +8,7 @@ url="https://github.com/mossbraxtin/fzfocus"
 license=('MIT')
 depends=('fzf' 'neovim' 'sqlite' 'bat')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-b2sums=('SKIP')
+b2sums=('39cf824140e3d4f4f5b9d2cdaf78eebe82ff97ba37cbfdf8e58327441f9ce1de20c659f13ecea955138c83050b3fee53078e969b56a53e5add3a5f5104908d60')
 
 package() {
     cd "$pkgname-$pkgver"
