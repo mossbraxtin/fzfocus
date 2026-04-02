@@ -161,7 +161,7 @@ cmd_calendar() {
             --preview "$FZFOCUS_SCRIPT --preview-cal-grid {1} $year $month" \
             --preview-label ' Grid + Day ' \
             --preview-label-pos bottom \
-            --preview-window 'right:32:wrap:border-left:noscroll' \
+            --preview-window 'right:32:wrap:border-left' \
             --bind 'j:down,k:up,g:first,G:last' \
             --bind 'ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up' \
             --bind 'ctrl-k:preview-up,ctrl-j:preview-down' \
