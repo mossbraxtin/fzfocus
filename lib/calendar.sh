@@ -76,9 +76,10 @@ _cal_day_entries() {
     today=$(date +%Y-%m-%d)
 
     for ((day=1; day<=days_in_month; day++)); do
-        local date_str weekday has_todos indicator color reset="\033[0m"
+        local date_str weekday day_label has_todos indicator color reset="\033[0m"
         printf -v date_str "%04d-%02d-%02d" "$year" "$month" "$day"
         weekday=$(date -d "$date_str" '+%a')
+        day_label=$(date -d "$date_str" '+%b %e')
         has_todos=$(db_query "SELECT COUNT(*) FROM todos WHERE due_date='$date_str' AND status='pending';")
 
         indicator=""
@@ -88,7 +89,7 @@ _cal_day_entries() {
         [[ $date_str == "$today" ]]                            && color="\033[1;33m" && indicator+=" ◀ today"
         [[ ${has_todos:-0} -gt 0 && $date_str != "$today" ]]  && color="\033[1;36m"
 
-        printf "${color}%s  %s%s${reset}\n" "$date_str" "$weekday" "$indicator"
+        printf "${color}%s  %-6s %s%s${reset}\n" "$date_str" "$day_label" "$weekday" "$indicator"
     done
 }
 
@@ -161,7 +162,7 @@ cmd_calendar() {
             --preview "$FZFOCUS_SCRIPT --preview-cal-grid {1} $year $month" \
             --preview-label ' Grid + Day ' \
             --preview-label-pos bottom \
-            --preview-window 'right:32:wrap:border-left' \
+            --preview-window 'right:55%:wrap:border-left' \
             --bind 'j:down,k:up,g:first,G:last' \
             --bind 'ctrl-d:preview-half-page-down,ctrl-u:preview-half-page-up' \
             --bind 'ctrl-k:preview-up,ctrl-j:preview-down' \
